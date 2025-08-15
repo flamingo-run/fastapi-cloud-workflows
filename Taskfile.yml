@@ -1,0 +1,81 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install production dependencies
+    cmds:
+      - uv sync --no-dev
+
+  install-dev:
+    desc: Install development dependencies
+    cmds:
+      - uv sync --group docs --group dev
+      - uv pip install -e .
+
+  install-docs:
+    desc: Install documentation dependencies
+    cmds:
+      - uv sync --group docs
+
+  update:
+    desc: Update dependencies
+    cmds:
+      - uv lock --upgrade
+
+  test:
+    desc: Run tests
+    deps: [install-dev]
+    cmds:
+      - uv run pytest
+
+  lint:
+    desc: Run linting
+    cmds:
+      - uv run ruff check .
+      - uv run ruff format --check .
+      - uv run ty check
+
+  format:
+    desc: Format code
+    cmds:
+      - uv run ruff format .
+      - uv run ruff check --fix --unsafe-fixes .
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf build/
+      - rm -rf dist/
+      - rm -rf src/*.egg-info/
+      - rm -rf .coverage
+      - rm -rf htmlcov/
+
+  build:
+    desc: Build package
+    deps: [clean]
+    cmds:
+      - uv build
+
+  publish:
+    desc: Publish to PyPI
+    deps: [build]
+    cmds:
+      - uv publish
+
+  docs-build:
+    desc: Build the documentation
+    deps: [install-docs]
+    cmds:
+      - uv run mkdocs build --config-file ./mkdocs.yml
+
+  docs-serve:
+    desc: Serve the documentation locally
+    deps: [install-docs]
+    cmds:
+      - uv run mkdocs serve --config-file ./mkdocs.yml
+
+  docs-deploy:
+    desc: Deploy documentation to GitHub Pages
+    deps: [install-docs]
+    cmds:
+      - uv run mkdocs gh-deploy --config-file ./mkdocs.yml
