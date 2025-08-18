@@ -1,0 +1,61 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_validate-cart:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/validate-cart"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - capture_run_id_0:
+      assign:
+      - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+  - assign_1:
+      assign:
+      - payload:
+          amount: ${payload.total}
+          currency: ${payload.currency}
+  - call_psp-charge:
+      call: http.post
+      args:
+        url: ${sys.get_env("PSP_URL") + "/charge"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("PSP_URL")}
+      result: res_2
+  - set_payload_2:
+      assign:
+      - payload: ${res_2.body}
+  - call_summarize-charge:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/summarize-charge"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_3
+  - set_payload_3:
+      assign:
+      - payload: ${res_3.body}
+  - return_final:
+      return: ${payload}

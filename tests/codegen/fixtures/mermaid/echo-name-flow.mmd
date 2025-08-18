@@ -1,0 +1,8 @@
+graph TD
+  subgraph echo-name-flow
+    external-echo[external-echo]
+    extract-name[extract-name]
+    name-shout[name-shout]
+    external-echo --> extract-name
+    extract-name --> name-shout
+  end

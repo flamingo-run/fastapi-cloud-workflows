@@ -1,0 +1,52 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_external-echo:
+      call: http.post
+      args:
+        url: ${sys.get_env("ECHO_URL")}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - call_extract-name:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/extract-name"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_1
+  - set_payload_1:
+      assign:
+      - payload: ${res_1.body}
+  - capture_run_id_1:
+      assign:
+      - run_id: ${res_1.headers["X-Workflow-Run-Id"]}
+  - call_name-shout:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/name-shout"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_2
+  - set_payload_2:
+      assign:
+      - payload: ${res_2.body}
+  - return_final:
+      return: ${payload}

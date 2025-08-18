@@ -1,0 +1,43 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_dad-joke-fetch:
+      call: http.get
+      args:
+        url: https://icanhazdadjoke.com/
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+          Accept: application/json
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - capture_run_id_0:
+      assign:
+      - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+  - assign_1:
+      assign:
+      - payload:
+          setup: ${payload.joke[:int(len(payload.joke)/2)]}
+          punch: ${payload.joke[int(len(payload.joke)/2):]}
+  - call_dad-joke-rate:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/dad-joke-rate"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_2
+  - set_payload_2:
+      assign:
+      - payload: ${res_2.body}
+  - return_final:
+      return: ${payload}
