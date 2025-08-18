@@ -1,0 +1,103 @@
+[project]
+name = "fastapi-cloudflow"
+version = "0.0.1"
+description = "Typed Python-to-Google Cloud Workflows framework with FastAPI codegen"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+  { name = "Joao Daher", email = "joao@daher.dev" }
+]
+dependencies = [
+  "fastapi>=0.111",
+  "pydantic>=2.6",
+  "PyYAML>=6.0.1",
+  "typer>=0.16.0",
+]
+
+[project.scripts]
+fastapi-cloudflow = "fastapi_cloudflow.cli:app"
+
+[dependency-groups]
+cli = [
+  "typer>=0.12",
+]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.0.0",
+    "pytest-rerunfailures>=15.0",
+    "ruff>=0.12.9",
+    "ty>=0.0.1a18",
+    "email-validator>=2.2.0",
+    "httpx>=0.27.0",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.14",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+exclude = [
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "ICN", # flake8-import-conventions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fastapi_cloudflow", "app", "tests"]
+
+
+[tool.ty.environment]
+root = ["./src", "./examples/app"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--reruns=3",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=fastapi_cloudflow",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+pythonpath = ["src", "examples/app"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+  "src/fastapi_cloudflow/cli.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.19"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
