@@ -1,0 +1,10 @@
+graph TD
+  subgraph user-signup
+    hash-password[hash-password]
+    draft->idp[draft->idp]
+    idp-call[idp-call]
+    persist-user[persist-user]
+    hash-password --> draft->idp
+    draft->idp --> idp-call
+    idp-call --> persist-user
+  end

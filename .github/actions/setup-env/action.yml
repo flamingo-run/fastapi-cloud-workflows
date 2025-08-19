@@ -1,0 +1,22 @@
+name: Setup FastAPI Cloudflow Environment
+description: Common environment setup for all FastAPI Cloudflow jobs
+
+inputs:
+  github-token:
+    description: 'GitHub token for authentication'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+        repo-token: ${{ inputs.github-token }}
+    - name: Install dependencies
+      run: task install-dev
+      shell: bash

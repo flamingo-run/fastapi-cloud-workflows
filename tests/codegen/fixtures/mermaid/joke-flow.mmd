@@ -1,0 +1,8 @@
+graph TD
+  subgraph joke-flow
+    joke-fetch[joke-fetch]
+    joke-split[joke-split]
+    joke-rate[joke-rate]
+    joke-fetch --> joke-split
+    joke-split --> joke-rate
+  end

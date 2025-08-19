@@ -1,0 +1,10 @@
+graph TD
+  subgraph payment-flow
+    validate-cart[validate-cart]
+    cart->psp[cart->psp]
+    psp-charge[psp-charge]
+    summarize-charge[summarize-charge]
+    validate-cart --> cart->psp
+    cart->psp --> psp-charge
+    psp-charge --> summarize-charge
+  end

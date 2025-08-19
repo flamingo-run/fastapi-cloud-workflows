@@ -1,0 +1,8 @@
+graph TD
+  subgraph post-story-flow
+    build-story[build-story]
+    create-post[create-post]
+    summarize-post[summarize-post]
+    build-story --> create-post
+    create-post --> summarize-post
+  end

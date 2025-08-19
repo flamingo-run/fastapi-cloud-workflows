@@ -1,0 +1,61 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_hash-password:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/hash-password"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - capture_run_id_0:
+      assign:
+      - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+  - assign_1:
+      assign:
+      - payload:
+          email: ${payload.email}
+          secret: ${payload.hashed_password}
+  - call_idp-call:
+      call: http.post
+      args:
+        url: ${sys.get_env("IDP_URL") + "/signup"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("IDP_URL")}
+      result: res_2
+  - set_payload_2:
+      assign:
+      - payload: ${res_2.body}
+  - call_persist-user:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/persist-user"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_3
+  - set_payload_3:
+      assign:
+      - payload: ${res_3.body}
+  - return_final:
+      return: ${payload}

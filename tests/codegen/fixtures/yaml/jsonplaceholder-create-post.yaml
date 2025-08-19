@@ -1,0 +1,21 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_jp-create-post:
+      call: http.post
+      args:
+        url: https://jsonplaceholder.typicode.com/posts
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - capture_run_id_0:
+      assign:
+      - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+  - return_final:
+      return: ${payload}
