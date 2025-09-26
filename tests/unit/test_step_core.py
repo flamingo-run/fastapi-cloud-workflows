@@ -163,6 +163,7 @@ def test_http_step_with_all_options():
     assert http_step.method == "PUT"
     assert http_step.headers == headers
     assert http_step.auth == auth
+    assert http_step.retry is not None
     assert http_step.retry.max_retries == 5
     assert http_step.timeout == timedelta(seconds=60)
 

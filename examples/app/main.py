@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from flows import echo_name, jokes, order, payments, post_story, user  # noqa: F401
+from flows import data_pipeline, echo_name, jokes, order, payments, post_story, resilient_payment, user  # noqa: F401
 
 from fastapi_cloudflow import attach_to_fastapi
 

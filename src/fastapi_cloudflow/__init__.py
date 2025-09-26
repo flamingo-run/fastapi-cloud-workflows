@@ -6,9 +6,13 @@ from fastapi_cloudflow.core import (
     ModelAdapter,
     RetryPolicy,
     Step,
+    TryCatchBuilder,
+    TryCatchStep,
     Workflow,
     get_registry,
+    get_workflows,
     step,
+    try_catch,
     workflow,
 )
 from fastapi_cloudflow.runtime import attach_to_fastapi, build_app
@@ -16,15 +20,19 @@ from fastapi_cloudflow.runtime import attach_to_fastapi, build_app
 __all__ = [
     "step",
     "workflow",
+    "try_catch",
     "Context",
     "Step",
     "Workflow",
     "RetryPolicy",
+    "TryCatchStep",
+    "TryCatchBuilder",
     "AssignStep",
     "HttpStep",
     "ModelAdapter",
     "Arg",
     "get_registry",
+    "get_workflows",
     "attach_to_fastapi",
     "build_app",
 ]

@@ -49,10 +49,7 @@ def test_step_with_complex_logic():
         assert ctx.workflow.step == "complex-step"
 
         # Perform calculation
-        if data.value < 0:
-            result = abs(data.value) * 3
-        else:
-            result = data.value * 2
+        result = abs(data.value) * 3 if data.value < 0 else data.value * 2
 
         return OutputModel(result=result)
 
@@ -79,10 +76,7 @@ def test_step_accessing_context():
 
     async def context_aware_step(ctx: Context, data: InputModel) -> OutputModel:
         # Use context information in the step logic
-        if ctx.workflow.run_id:
-            multiplier = 3
-        else:
-            multiplier = 2
+        multiplier = 3 if ctx.workflow.run_id else 2
 
         return OutputModel(result=data.value * multiplier)
 

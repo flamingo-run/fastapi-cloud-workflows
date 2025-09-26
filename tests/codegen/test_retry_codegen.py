@@ -131,15 +131,18 @@ def test_multiple_steps_with_different_retry_policies():
 
     # Check step1
     step1_call = next((s for s in steps if "call_multi-step1" in s), None)
+    assert step1_call is not None
     assert step1_call["call_multi-step1"]["retry"]["max_retries"] == 2
 
     # Check step2
     step2_call = next((s for s in steps if "call_multi-step2" in s), None)
+    assert step2_call is not None
     assert step2_call["call_multi-step2"]["retry"]["max_retries"] == 5
     assert step2_call["call_multi-step2"]["retry"]["backoff"]["initial_delay"] == 3.0
 
     # Check step3 (no retry)
     step3_call = next((s for s in steps if "call_multi-step3" in s), None)
+    assert step3_call is not None
     assert "retry" not in step3_call["call_multi-step3"]
 
 
@@ -164,7 +167,7 @@ def test_emit_workflow_yaml_with_retry():
         steps = yaml_content["main"]["steps"]
 
         # Find retry step
-        retry_step = next((s for s in steps if any("call_yaml-retry-step" in k for k in s.keys())), None)
+        retry_step = next((s for s in steps if any("call_yaml-retry-step" in k for k in s)), None)
         assert retry_step is not None
 
         step_config = retry_step["call_yaml-retry-step"]

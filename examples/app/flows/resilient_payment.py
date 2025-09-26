@@ -29,12 +29,7 @@ class PaymentResult(BaseModel):
     status: str
     error: str | None = None
     retry_count: int = 0
-
-
-class FallbackResult(BaseModel):
-    fallback_used: bool
-    original_error: str | None
-    status: str
+    fallback_used: bool = False
 
 
 # Step with retry policy for flaky payment provider
@@ -84,17 +79,28 @@ payment_gateway = HttpStep(
 
 
 @step(name="fallback-payment")
-async def fallback_payment(ctx: Context, data: PaymentRequest) -> FallbackResult:
-    """Fallback payment processor when primary fails."""
+async def fallback_payment(ctx: Context, data: PaymentRequest) -> PaymentResult:
+    """Fallback payment processor when the primary provider fails."""
     # This would use an alternative payment method
-    return FallbackResult(fallback_used=True, original_error="Primary payment failed", status="processed_via_fallback")
+    return PaymentResult(
+        transaction_id=f"fallback_{data.customer_id}_{data.amount}",
+        status="fallback_processed",
+        error="Primary payment failed",
+        retry_count=data.retry_count + 1,
+        fallback_used=True,
+    )
 
 
 @step(name="log-failure")
-async def log_failure(ctx: Context, data: PaymentRequest) -> PaymentResult:
-    """Log payment failure for audit."""
+async def log_failure(ctx: Context, data: PaymentResult) -> PaymentResult:
+    """Log payment failure for audit and return the final result."""
+    # In a real implementation this would write to observability tooling.
     return PaymentResult(
-        transaction_id=None, status="failed", error="Payment could not be processed", retry_count=data.retry_count + 1
+        transaction_id=data.transaction_id,
+        status=data.status,
+        error=data.error or "Payment could not be processed",
+        retry_count=data.retry_count,
+        fallback_used=data.fallback_used,
     )
 
 
@@ -106,7 +112,7 @@ def build_resilient_payment_workflow():
     try_primary = workflow("primary-payment") >> process_payment
 
     # Fallback flow if primary fails
-    fallback_flow = workflow("fallback-flow") >> fallback_payment
+    workflow("fallback-flow") >> fallback_payment
 
     # Create try/catch block
     payment_with_fallback = TryCatchStep(
