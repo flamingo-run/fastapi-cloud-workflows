@@ -74,7 +74,7 @@ def test_workflow_composition_with_subworkflow():
 
     # Create child workflow
     child_wf = (workflow(f"child-workflow-{suffix}") >> child_step).build()
-    
+
     # Create parent workflow that uses child
     parent_wf = (
         workflow(f"parent-workflow-{suffix}")
@@ -118,12 +118,12 @@ def test_workflow_dependencies_tracking():
     @step(name=f"s3-{suffix}")
     async def s3(ctx: Context, data: OutputModel) -> InputModel:
         return InputModel(value=data.result)
-    
+
     # Create multiple workflows
     wf1 = (workflow("wf1") >> s1).build()
     wf2 = (workflow("wf2") >> s1).build()
-    wf3 = (workflow("wf3") >> s1 >> s3 >> wf1 >> s2).build()  # wf3 depends on wf1
-    wf4 = (workflow("wf4") >> s1 >> s3 >> wf2 >> s3 >> wf1 >> s2).build()  # wf4 depends on wf1 and wf2
+    (workflow("wf3") >> s1 >> s3 >> wf1 >> s2).build()  # wf3 depends on wf1
+    (workflow("wf4") >> s1 >> s3 >> wf2 >> s3 >> wf1 >> s2).build()  # wf4 depends on wf1 and wf2
 
     # Get dependency graph
     deps = get_workflow_dependencies()

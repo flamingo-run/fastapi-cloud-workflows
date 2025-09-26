@@ -19,8 +19,9 @@ class OutputModel(BaseModel):
 def test_subworkflow_yaml_generation():
     """Test that SubworkflowStep generates correct YAML."""
     import uuid
+
     suffix = str(uuid.uuid4())[:8]
-    
+
     @step(name=f"prepare-data-{suffix}")
     async def prepare_data(ctx: Context, data: InputModel) -> InputModel:
         return InputModel(value=data.value * 2)
@@ -48,7 +49,7 @@ def test_subworkflow_yaml_generation():
     # Find the subworkflow call step
     subworkflow_call = None
     for step_item in steps:
-        if any("call_child_workflow" in str(k) for k in step_item.keys()):
+        if any("call_child_workflow" in str(k) for k in step_item):
             subworkflow_call = step_item
             break
 
@@ -66,8 +67,9 @@ def test_subworkflow_yaml_generation():
 def test_subworkflow_with_mappings_yaml():
     """Test SubworkflowStep with mappings generates correct YAML."""
     import uuid
+
     suffix = str(uuid.uuid4())[:8]
-    
+
     @step(name=f"setup-{suffix}")
     async def setup(ctx: Context, data: InputModel) -> InputModel:
         return data
@@ -91,7 +93,7 @@ def test_subworkflow_with_mappings_yaml():
 
     # Find subworkflow call
     for step_item in steps:
-        if any("call_mapped_workflow" in str(k) for k in step_item.keys()):
+        if any("call_mapped_workflow" in str(k) for k in step_item):
             call_step = list(step_item.values())[0]
             # Check input mapping applied
             assert "argument" in call_step["args"]
@@ -102,8 +104,9 @@ def test_subworkflow_with_mappings_yaml():
 def test_subworkflow_fire_and_forget_yaml():
     """Test SubworkflowStep in fire-and-forget mode generates correct YAML."""
     import uuid
+
     suffix = str(uuid.uuid4())[:8]
-    
+
     @step(name=f"trigger-{suffix}")
     async def trigger(ctx: Context, data: InputModel) -> InputModel:
         return data
@@ -115,10 +118,10 @@ def test_subworkflow_fire_and_forget_yaml():
     # Create fire-and-forget SubworkflowStep
     # For fire-and-forget, we need to set the output model to match input since it doesn't wait
     async_sub = SubworkflowStep(
-        workflow_id="async-workflow", 
-        input_model=InputModel, 
+        workflow_id="async-workflow",
+        input_model=InputModel,
         output_model=InputModel,  # Fire-and-forget should pass through the input type
-        wait=False
+        wait=False,
     )
 
     # Build workflow - note the types flow correctly now
@@ -136,7 +139,7 @@ def test_subworkflow_fire_and_forget_yaml():
 
     # Find async subworkflow call
     for step_item in steps:
-        if any("call_async_workflow" in str(k) for k in step_item.keys()):
+        if any("call_async_workflow" in str(k) for k in step_item):
             call_step = list(step_item.values())[0]
             assert call_step["call"] == "workflows.executeWorkflow"
             assert "result" not in call_step  # Should NOT wait for result
@@ -146,8 +149,9 @@ def test_subworkflow_fire_and_forget_yaml():
 def test_workflow_composition_yaml():
     """Test that workflow composition generates correct YAML."""
     import uuid
+
     suffix = str(uuid.uuid4())[:8]
-    
+
     @step(name=f"child-step-yaml-{suffix}")
     async def child_step(ctx: Context, data: InputModel) -> OutputModel:
         return OutputModel(result=data.value * 2)
@@ -181,7 +185,7 @@ def test_workflow_composition_yaml():
     # Verify subworkflow call exists
     has_subworkflow_call = False
     for step_item in steps:
-        if any("call_child_wf_yaml" in str(k) for k in step_item.keys()):
+        if any("call_child_wf_yaml" in str(k) for k in step_item):
             has_subworkflow_call = True
             call_step = list(step_item.values())[0]
             assert call_step["call"] == "workflows.executeWorkflow"
