@@ -85,7 +85,7 @@ steps:
     args:
       - -c
       - |
-        python3 tests/smoke/run_smoke.py --region ${_REGION}
+        python3 tests/smoke/test_run_smoke.py --region ${_REGION}
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     id: cleanup

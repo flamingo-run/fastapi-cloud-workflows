@@ -93,11 +93,6 @@ graph TD
   - `post_story.py` → post-story-flow: build story → POST external → summarize
   - `jokes.py` → joke-flow: fetch → split → rate
 
-## Codegen & tests
-- Codegen snapshots: `uv run -q pytest -q tests/codegen` (full-file YAML equality)
-- Unit tests: `uv run -q pytest -q tests/unit` (hits `/steps/<name>` endpoints with TestClient)
-- Smoke tests: `uv run -q python tests/smoke/run_smoke.py --region us-central1` (requires GCP & deployed example)
-
 ## Supported features (Cloud Workflows)
 
 | Feature | Status | Notes |
