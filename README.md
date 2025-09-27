@@ -93,11 +93,6 @@ graph TD
   - `post_story.py` → post-story-flow: build story → POST external → summarize
   - `jokes.py` → joke-flow: fetch → split → rate
 
-## Codegen & tests
-- Codegen snapshots: `uv run -q pytest -q tests/codegen` (full-file YAML equality)
-- Unit tests: `uv run -q pytest -q tests/unit` (hits `/steps/<name>` endpoints with TestClient)
-- Smoke tests: `uv run -q python tests/smoke/run_smoke.py --region us-central1` (requires GCP & deployed example)
-
 ## Supported features (Cloud Workflows)
 
 | Feature | Status | Notes |
@@ -110,15 +105,31 @@ graph TD
 | Sequential composition | ✅ | `workflow(...) >> step_a >> step_b` |
 | Workflow input/output | ✅ | single `payload` param; final `return: ${payload}` |
 | Error surfacing | ✅ | HTTP errors propagate; FastAPI returns typed 4xx/5xx |
-| Retries | ⏳ | planned `RetryPolicy` emission |
-| Try/catch | ❌ | not yet |
-| Conditionals / switch | ❌ | not yet |
-| Loops | ❌ | not yet |
-| Parallel branches / join | ❌ | not yet |
-| Subworkflows / call other workflows | ❌ | not yet |
-| GCP connectors / direct service calls | ❌ | not yet |
+| **Retries** | ✅ | `RetryPolicy` with backoff, predicates, max attempts |
+| **Try/catch** | ✅ | `TryCatchStep` with exception handling and optional re-raise |
+
+## Roadmap (Prioritized)
+
+Priority order for upcoming features:
+
+| Priority | Feature | Status | Notes |
+| --- | --- | --- | --- |
+| 1 | **Retries** | ✅ Completed | `RetryPolicy` with configurable backoff and predicates |
+| 2 | **Try/catch** | ✅ Completed | `TryCatchStep` for exception handling with fallback flows |
+| 3 | **Subworkflows** | 📋 Planned | Call other workflows, composition patterns |
+| 4 | **GCP connectors** | 📋 Planned | Direct service calls, native Cloud Workflows connectors |
+| 5 | **Deployment API** | 📋 Planned | Programmatic deployment of workflows & EventArc triggers via GCP APIs |
+| 6 | **Loops** | 📋 Planned | For/while constructs, iteration over collections |
+| 7 | **Conditionals / switch** | 📋 Planned | Branching logic, switch statements |
+| 8 | **Parallel branches / join** | 📋 Planned | Concurrent execution, fork/join patterns |
+
+### Deployment API (Planned)
+Beyond YAML generation, the framework will provide APIs to:
+- Deploy workflows programmatically to Google Cloud
+- Create and manage EventArc triggers
+- Configure IAM permissions and service accounts
+- Orchestrate complete workflow deployment pipelines
 
 ## Next steps
 - Open CONTRIBUTING.md for local setup, structure, and contribution checklist
 - Use descriptive names for workflows/steps and prefer multi-step workflows that show transformations
-

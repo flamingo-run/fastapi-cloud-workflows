@@ -1,0 +1,70 @@
+main:
+  params:
+  - payload
+  steps:
+  - try_catch_payment-with-fallback:
+      try:
+        steps:
+        - call_process-payment:
+            call: http.post
+            args:
+              url: ${sys.get_env("BASE_URL") + "/steps/process-payment"}
+              body: ${payload}
+              headers:
+                X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+                Content-Type: application/json
+              auth:
+                type: OIDC
+                audience: ${sys.get_env("BASE_URL")}
+              timeout: 30
+            result: res_0
+            retry:
+              predicate: ${http.default_retry_predicate}
+              max_retries: 3
+              backoff:
+                initial_delay: 2.0
+                max_delay: 10.0
+                multiplier: 2.0
+        - set_payload_0:
+            assign:
+            - payload: ${res_0.body}
+        - capture_run_id_0:
+            assign:
+            - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+      except:
+        as: payment_error
+        steps:
+        - call_fallback-payment:
+            call: http.post
+            args:
+              url: ${sys.get_env("BASE_URL") + "/steps/fallback-payment"}
+              body: ${payload}
+              headers:
+                X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+                X-Workflow-Run-Id: ${run_id}
+                Content-Type: application/json
+              auth:
+                type: OIDC
+                audience: ${sys.get_env("BASE_URL")}
+            result: res_50
+        - set_payload_50:
+            assign:
+            - payload: ${res_50.body}
+        - call_log-failure:
+            call: http.post
+            args:
+              url: ${sys.get_env("BASE_URL") + "/steps/log-failure"}
+              body: ${payload}
+              headers:
+                X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+                X-Workflow-Run-Id: ${run_id}
+                Content-Type: application/json
+              auth:
+                type: OIDC
+                audience: ${sys.get_env("BASE_URL")}
+            result: res_51
+        - set_payload_51:
+            assign:
+            - payload: ${res_51.body}
+  - return_final:
+      return: ${payload}

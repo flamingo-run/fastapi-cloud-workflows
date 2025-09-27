@@ -23,7 +23,7 @@ uv sync
 Run end-to-end against deployed Workflows (requires Google Cloud project and a deployed example app):
 ```
 export GOOGLE_CLOUD_PROJECT=<your-project>
-uv run -q python tests/smoke/run_smoke.py --region us-central1
+uv run -q python tests/smoke/test_run_smoke.py --region us-central1
 ```
 
 ### Project structure

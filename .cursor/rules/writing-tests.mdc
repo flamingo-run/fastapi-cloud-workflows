@@ -1,0 +1,33 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+Tests should:
+- be placed in the `tests` directory.
+- be named like `test_<name>.py`.
+- not cheat by using if/else ot try/except statements to assert different outcomes.
+- be deterministic
+- not too redundant with other tests
+
+Example workflows should:
+- be simple and focused
+- cover a specific feature
+- have friendly name
+- be creative/funny whenever possible
+
+Unit tests should:
+- be placed in the `tests/unit` directory.
+- assert small portions of the code, such as validation logic or input/output shapes.
+
+Codegen tests should:
+- be placed in the `tests/codegen` directory.
+- build the workflow to cover a specific feature
+- assert the YAML emitted by the CLI (stored in `tests/codegen/fixtures/yaml`)
+- assert the mermaid graphs emitted by the CLI (stored in `tests/codegen/fixtures/mermaid`)
+
+Smoke tests should:
+- be placed in the `tests/smoke` directory.
+- deploy the workflow to GCP
+- assert the workflow runs successfully
+- assert the workflow output is as expected

@@ -1,4 +1,5 @@
 from fastapi_cloudflow.core.arg import Arg, ArgExpr
+from fastapi_cloudflow.core.error_handling import TryCatchBuilder, TryCatchStep, try_catch
 from fastapi_cloudflow.core.step import AssignStep, HttpStep, ModelAdapter, Step
 from fastapi_cloudflow.core.types import Context, RetryPolicy, WorkflowMeta
 from fastapi_cloudflow.core.workflow import (
@@ -21,6 +22,9 @@ __all__ = [
     "AssignStep",
     "HttpStep",
     "ModelAdapter",
+    "TryCatchStep",
+    "TryCatchBuilder",
+    "try_catch",
     "Workflow",
     "Registry",
     "WorkflowBuilder",
