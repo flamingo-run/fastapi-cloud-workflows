@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from fastapi import Request
 
@@ -35,3 +36,9 @@ class RetryPolicy:
             multiplier=2.0,
             predicate="http.default_retry_predicate",
         )
+
+
+@dataclass
+class ConnectorCall:
+    call: str
+    args: dict[str, Any]

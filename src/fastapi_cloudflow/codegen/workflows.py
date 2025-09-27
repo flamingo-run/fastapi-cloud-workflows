@@ -3,7 +3,7 @@ from typing import Any
 
 import yaml
 
-from ..core import AssignStep, HttpStep, TryCatchStep, Workflow
+from ..core import AssignStep, ConnectorStep, HttpStep, TryCatchStep, Workflow
 
 
 def _is_arg_expr(v: Any) -> bool:
@@ -130,6 +130,29 @@ def _process_single_step(
             step_def["retry"] = retry_config
         steps.append({f"call_{node.name}": step_def})
         steps.append({f"set_payload_{idx}": {"assign": [{payload_var: f"${{{result_var}.body}}"}]}})
+        return steps, have_run_id
+
+    if isinstance(node, ConnectorStep):
+        result_var = f"res_{idx}"
+        call = node.call
+
+        args = {k: _as_yaml_expr(v) for k, v in call.args.items()}
+
+        step_def: dict[str, Any] = {
+            "call": call.call,
+            "args": args,
+            "result": result_var,
+        }
+
+        if node.timeout:
+            step_def.setdefault("args", {})["timeout"] = int(node.timeout.total_seconds())
+
+        retry_config = _emit_retry_config(node.retry)
+        if retry_config:
+            step_def["retry"] = retry_config
+
+        steps.append({f"call_{node.name}": step_def})
+        steps.append({f"set_payload_{idx}": {"assign": [{payload_var: f"${{{result_var}}}"}]}})
         return steps, have_run_id
 
     # Python step via FastAPI endpoint

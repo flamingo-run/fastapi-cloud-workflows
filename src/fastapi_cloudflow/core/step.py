@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 
 from fastapi_cloudflow.core.arg import ArgExpr
-from fastapi_cloudflow.core.types import Context, RetryPolicy
+from fastapi_cloudflow.core.types import ConnectorCall, Context, RetryPolicy
 
 InT = TypeVar("InT", bound=BaseModel)
 OutT = TypeVar("OutT", bound=BaseModel)
@@ -136,6 +136,22 @@ class HttpStep(Step[InT, OutT]):
         self.url = url
         self.headers = headers or {}
         self.auth = auth
+
+
+class ConnectorStep(Step[InT, OutT]):
+    def __init__(
+        self,
+        name: str,
+        input_model: type[InT],
+        output_model: type[OutT],
+        call: ConnectorCall,
+        retry: RetryPolicy | None = None,
+        timeout: timedelta | None = None,
+    ) -> None:
+        super().__init__(
+            name=name, input_model=input_model, output_model=output_model, fn=None, retry=retry, timeout=timeout
+        )
+        self.call = call
 
 
 class ModelAdapter(Step[InT, OutT]):
