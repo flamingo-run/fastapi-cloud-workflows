@@ -80,6 +80,35 @@ def _process_single_step(
         )
         return steps, have_run_id
 
+    # Handle SubworkflowStep
+    from fastapi_cloudflow.core.subworkflow import SubworkflowStep
+
+    if isinstance(node, SubworkflowStep):
+        result_var = f"res_{idx}"
+        args = {"workflow_id": node.workflow_id, "argument": f"${{{payload_var}}}"}
+
+        # Apply input mapping if specified
+        if node.input_mapping:
+            mapped_args = {k: _as_yaml_expr(v) for k, v in node.input_mapping.items()}
+            args["argument"] = f"${mapped_args}"
+
+        step_def: dict[str, Any] = {"call": "workflows.executeWorkflow", "args": args}
+
+        if node.wait:
+            step_def["result"] = result_var
+            steps.append({f"call_{node.name}": step_def})
+            # Extract result and apply output mapping
+            if node.output_mapping:
+                mapped_output = {k: f"${{{result_var}.{v}}}" for k, v in node.output_mapping.items()}
+                steps.append({f"map_output_{idx}": {"assign": [{payload_var: mapped_output}]}})
+            else:
+                steps.append({f"set_payload_{idx}": {"assign": [{payload_var: f"${{{result_var}}}"}]}})
+        else:
+            # Fire-and-forget mode (no result)
+            steps.append({f"call_{node.name}": step_def})
+
+        return steps, have_run_id
+
     if isinstance(node, HttpStep):
         method = node.method.lower()
         result_var = f"res_{idx}"

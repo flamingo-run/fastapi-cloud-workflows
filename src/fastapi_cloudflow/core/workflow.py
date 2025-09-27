@@ -14,6 +14,24 @@ class Workflow:
     def __init__(self, name: str, nodes: list[Step[Any, Any]]) -> None:
         self.name = name
         self.nodes = nodes
+        self.dependencies: set[str] = set()
+
+    def to_subworkflow_step(self) -> Step[Any, Any]:
+        """Convert this workflow to a SubworkflowStep for composition."""
+        from fastapi_cloudflow.core.subworkflow import SubworkflowStep
+
+        # Get input/output models from first and last steps
+        if not self.nodes:
+            raise ValueError(f"Workflow '{self.name}' has no steps")
+
+        first_step = self.nodes[0]
+        last_step = self.nodes[-1]
+
+        return SubworkflowStep(
+            workflow_id=self.name,
+            input_model=first_step.input_model,
+            output_model=last_step.output_model,
+        )
 
 
 class Registry:
@@ -44,21 +62,36 @@ class WorkflowBuilder:
     def __init__(self, name: str, nodes: list[Step[Any, Any]] | None = None) -> None:
         self.name = name
         self.nodes = nodes or []
+        self._dependencies: set[str] = set()
 
-    def __rshift__(self, other: Step[Any, Any]) -> WorkflowBuilder:
+    def __rshift__(self, other: Step[Any, Any] | Workflow) -> WorkflowBuilder:
+        # Convert Workflow to SubworkflowStep if needed
+        if isinstance(other, Workflow):
+            step = other.to_subworkflow_step()
+            # Track dependency
+            self._dependencies.add(other.name)
+        else:
+            step = other
+
         if self.nodes:
             prev = self.nodes[-1]
-            if prev.output_model is not other.input_model:
+            if prev.output_model is not step.input_model:
                 raise TypeError(
                     f"Type mismatch: {prev.name} outputs {prev.output_model.__name__} "
-                    f"but {other.name} expects {other.input_model.__name__}"
+                    f"but {step.name} expects {step.input_model.__name__}"
                 )
-        return WorkflowBuilder(self.name, self.nodes + [other])
+
+        # Create new builder with updated nodes and preserve dependencies
+        new_builder = WorkflowBuilder(self.name, self.nodes + [step])
+        new_builder._dependencies = self._dependencies.copy()
+        return new_builder
 
     def build(self) -> Workflow:
         if not self.nodes:
             raise ValueError("Workflow has no steps")
         wf = Workflow(self.name, self.nodes)
+        # Transfer any tracked dependencies
+        wf.dependencies = self._dependencies
         _REGISTRY.register_workflow(wf)
         return wf
 
@@ -109,3 +142,12 @@ def get_registry() -> Registry:
 
 def get_workflows() -> list[Workflow]:
     return _REGISTRY.get_workflows()
+
+
+def get_workflow_dependencies() -> dict[str, set[str]]:
+    """Get all workflow dependencies as a mapping."""
+    deps: dict[str, set[str]] = {}
+    for wf in _REGISTRY.workflows.values():
+        if wf.dependencies:
+            deps[wf.name] = wf.dependencies
+    return deps
