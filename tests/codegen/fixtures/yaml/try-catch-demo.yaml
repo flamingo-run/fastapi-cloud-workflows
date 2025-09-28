@@ -1,0 +1,48 @@
+main:
+  params:
+  - payload
+  steps:
+  - try_catch_tc-safe:
+      try:
+        steps:
+        - call_tc-risky:
+            call: http.post
+            args:
+              url: ${sys.get_env("BASE_URL") + "/steps/tc-risky"}
+              body: ${payload}
+              headers:
+                X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+                Content-Type: application/json
+              auth:
+                type: OIDC
+                audience: ${sys.get_env("BASE_URL")}
+            result: res_0
+        - set_payload_0:
+            assign:
+            - payload: ${res_0.body}
+        - capture_run_id_0:
+            assign:
+            - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+      except:
+        as: e
+        steps:
+        - call_tc-handler:
+            call: http.post
+            args:
+              url: ${sys.get_env("BASE_URL") + "/steps/tc-handler"}
+              body: ${payload}
+              headers:
+                X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+                X-Workflow-Run-Id: ${run_id}
+                Content-Type: application/json
+              auth:
+                type: OIDC
+                audience: ${sys.get_env("BASE_URL")}
+            result: res_50
+        - set_payload_50:
+            assign:
+            - payload: ${res_50.body}
+        - reraise_tc-safe:
+            raise: ${e}
+  - return_final:
+      return: ${payload}

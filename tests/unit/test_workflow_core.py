@@ -23,17 +23,41 @@ class DifferentModel(BaseModel):
     data: str
 
 
-def test_step_name_collision():
-    """Test that registering steps with same name raises ValueError."""
+def test_step_reregistration_identical_definition_is_ignored():
+    """Registering the same step definition twice should succeed."""
     registry = Registry()
 
-    step1 = Step("duplicate-name", InputModel, OutputModel)
-    step2 = Step("duplicate-name", InputModel, OutputModel)
+    async def callable(ctx: Context, data: InputModel) -> OutputModel:
+        return OutputModel(result=data.value)
 
+    step1 = Step("duplicate-name", InputModel, OutputModel, fn=callable)
     registry.register_step(step1)
 
-    with pytest.raises(ValueError, match="Step name collision: duplicate-name"):
-        registry.register_step(step2)
+    # Should be a no-op when the equivalent definition is registered
+    step_clone = Step("duplicate-name", InputModel, OutputModel, fn=callable)
+    registry.register_step(step_clone)
+
+    assert registry.steps["duplicate-name"] is step1
+
+
+def test_step_name_collision_still_raises_for_different_defs():
+    """Registering steps with same name but different definitions should raise."""
+    registry = Registry()
+
+    async def callable(ctx: Context, data: InputModel) -> OutputModel:
+        return OutputModel(result=data.value)
+
+    first = Step("callable-step", InputModel, OutputModel, fn=callable)
+    registry.register_step(first)
+
+    # Different definition (different function body)
+    async def another_callable(ctx: Context, data: InputModel) -> OutputModel:
+        return OutputModel(result=data.value + 1)
+
+    different = Step("callable-step", InputModel, OutputModel, fn=another_callable)
+
+    with pytest.raises(ValueError, match="Step name collision: callable-step"):
+        registry.register_step(different)
 
 
 def test_workflow_name_collision_different_steps():

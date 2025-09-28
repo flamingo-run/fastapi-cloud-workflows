@@ -40,7 +40,10 @@ class Registry:
         self.workflows: dict[str, Workflow] = {}
 
     def register_step(self, step: Step[Any, Any]) -> None:
-        if step.name in self.steps:
+        existing = self.steps.get(step.name)
+        if existing is not None:
+            if existing.fingerprint == step.fingerprint:
+                return
             raise ValueError(f"Step name collision: {step.name}")
         self.steps[step.name] = step
 
