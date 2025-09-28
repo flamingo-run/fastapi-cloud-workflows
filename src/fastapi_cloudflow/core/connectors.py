@@ -44,7 +44,7 @@ def pubsub_message(
         if isinstance(attributes, ArgExpr):
             message["attributes"] = attributes
         else:
-            message["attributes"] = attributes.copy()
+            message["attributes"] = dict(attributes)
 
     if ordering_key is not None:
         message["orderingKey"] = ordering_key

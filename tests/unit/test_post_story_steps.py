@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-from main import app
+
+from examples.app.main import app
 
 
 def test_build_story_and_summarize() -> None:

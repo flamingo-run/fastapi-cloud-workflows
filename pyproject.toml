@@ -68,7 +68,7 @@ known-first-party = ["fastapi_cloudflow", "app", "tests"]
 
 
 [tool.ty.environment]
-root = ["./src", "./examples/app"]
+root = [".", "./src"]
 
 [tool.pytest.ini_options]
 addopts = [
