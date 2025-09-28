@@ -1,6 +1,6 @@
 [project]
 name = "fastapi-cloudflow"
-version = "0.0.3"
+version = "0.0.4"
 description = "Typed Python-to-Google Cloud Workflows framework with FastAPI codegen"
 readme = "README.md"
 requires-python = ">=3.13"
