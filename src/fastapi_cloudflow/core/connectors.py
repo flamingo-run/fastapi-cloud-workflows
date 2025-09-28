@@ -88,7 +88,7 @@ class PubSubPublishResult(BaseModel):
     message_ids: list[str]
 
 
-def pubsub_publish_step(
+def pubsub_publish_step[InT: BaseModel, OutT: BaseModel](
     *,
     name: str,
     topic: str,

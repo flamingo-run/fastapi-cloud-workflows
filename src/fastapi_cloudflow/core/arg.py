@@ -47,8 +47,5 @@ class Arg:
 
     @staticmethod
     def base64(value: str | ArgExpr) -> ArgExpr:
-        if isinstance(value, ArgExpr):
-            inner = value.expr
-        else:
-            inner = json.dumps(value)
+        inner = value.expr if isinstance(value, ArgExpr) else json.dumps(value)
         return ArgExpr(f"base64.encode({inner})")
