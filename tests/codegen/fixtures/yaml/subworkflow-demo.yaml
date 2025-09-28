@@ -1,0 +1,50 @@
+main:
+  params:
+  - payload
+  steps:
+  - call_subwf-prepare:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/subwf-prepare"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_0
+  - set_payload_0:
+      assign:
+      - payload: ${res_0.body}
+  - capture_run_id_0:
+      assign:
+      - run_id: ${res_0.headers["X-Workflow-Run-Id"]}
+  - call_call_subwf_child:
+      call: workflows.executeWorkflow
+      args:
+        workflow_id: subwf-child
+        argument: '${''custom_field'': ''${payload.value}''}'
+      result: res_1
+  - map_output_1:
+      assign:
+      - payload:
+          result: ${res_1.custom_result}
+  - call_subwf-finalize:
+      call: http.post
+      args:
+        url: ${sys.get_env("BASE_URL") + "/steps/subwf-finalize"}
+        body: ${payload}
+        headers:
+          X-Workflow-Name: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_ID")}
+          X-Workflow-Run-Id: ${run_id}
+          Content-Type: application/json
+        auth:
+          type: OIDC
+          audience: ${sys.get_env("BASE_URL")}
+      result: res_2
+  - set_payload_2:
+      assign:
+      - payload: ${res_2.body}
+  - return_final:
+      return: ${payload}

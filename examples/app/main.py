@@ -1,14 +1,23 @@
 from fastapi import FastAPI
-from flows import data_pipeline, echo_name, jokes, order, payments, post_story, resilient_payment, user  # noqa: F401
 
+from examples.app.flows import (  # noqa: F401
+    data_pipeline,
+    echo_name,
+    jokes,
+    order,
+    payments,
+    post_story,
+    resilient_payment,
+    user,
+)
 from fastapi_cloudflow import attach_to_fastapi
 
 
 def create_app() -> FastAPI:
     app = FastAPI()
     # Import types used for stub endpoints
-    from flows.payments import PSPReq, PSPRes
-    from flows.user import IdentityReq, IdentityRes
+    from examples.app.flows.payments import PSPReq, PSPRes
+    from examples.app.flows.user import IdentityReq, IdentityRes
 
     @app.get("/health")
     def health() -> dict[str, str]:  # noqa: D401

@@ -117,7 +117,7 @@ Priority order for upcoming features:
 | 1 | **Retries** | ✅ Completed | `RetryPolicy` with configurable backoff and predicates |
 | 2 | **Try/catch** | ✅ Completed | `TryCatchStep` for exception handling with fallback flows |
 | 3 | **Subworkflows** | ✅ Completed | Call other workflows with `>> WORKFLOW`, dependency tracking |
-| 4 | **GCP connectors** | 📋 Planned | Direct service calls, native Cloud Workflows connectors |
+| 4 | **GCP connectors** | ✅ Completed | Direct service calls using Cloud Workflows connectors (Pub/Sub first) |
 | 5 | **Deployment API** | 📋 Planned | Programmatic deployment of workflows & EventArc triggers via GCP APIs |
 | 6 | **Loops** | 📋 Planned | For/while constructs, iteration over collections |
 | 7 | **Conditionals / switch** | 📋 Planned | Branching logic, switch statements |

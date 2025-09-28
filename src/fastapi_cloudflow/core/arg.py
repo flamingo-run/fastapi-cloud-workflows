@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 
 class ArgExpr:
     def __init__(self, expr: str) -> None:
@@ -38,3 +40,12 @@ class Arg:
     @staticmethod
     def ctx(key: str) -> ArgExpr:
         return ArgExpr(f"ctx.{key}")
+
+    @staticmethod
+    def expr(expression: str) -> ArgExpr:
+        return ArgExpr(expression)
+
+    @staticmethod
+    def base64(value: str | ArgExpr) -> ArgExpr:
+        inner = value.expr if isinstance(value, ArgExpr) else json.dumps(value)
+        return ArgExpr(f"base64.encode({inner})")

@@ -1,0 +1,8 @@
+graph TD
+  subgraph subworkflow-demo
+    subwf-prepare[subwf-prepare]
+    call_subwf_child[call_subwf_child]
+    subwf-finalize[subwf-finalize]
+    subwf-prepare --> call_subwf_child
+    call_subwf_child --> subwf-finalize
+  end
